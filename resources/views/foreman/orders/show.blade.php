@@ -61,7 +61,32 @@
 
                     <div class="form-group">
                         <label class="form-label">Foto Proyek Hari Ini *</label>
-                        <input type="file" name="photo" class="form-control" accept="image/*" capture="environment" required>
+                        
+                        <!-- Hidden real file input -->
+                        <input type="file" id="photo-input" name="photo" style="display: none;" accept="image/*" required>
+                        
+                        <!-- Two action buttons -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+                            <button type="button" id="btn-gallery" class="btn btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; padding: 10px; font-weight: 600; cursor: pointer; border-radius: var(--radius); border: 1.5px solid var(--border-color); background: var(--surface);">
+                                <i class="fas fa-images" style="color: var(--accent-blue);"></i> Galeri
+                            </button>
+                            <button type="button" id="btn-camera" class="btn btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; padding: 10px; font-weight: 600; cursor: pointer; border-radius: var(--radius); border: 1.5px solid #d97706; background: #d97706; color: white;">
+                                <i class="fas fa-camera"></i> Kamera
+                            </button>
+                        </div>
+                        
+                        <!-- File Preview Card -->
+                        <div id="file-preview-container" style="display: none; align-items: center; gap: 12px; padding: 10px; border: 1.5px dashed var(--border-color); border-radius: var(--radius); background: rgba(0,0,0,0.01); margin-bottom: 8px;">
+                            <img id="file-preview-img" src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="flex: 1; overflow: hidden; line-height: 1.4;">
+                                <span id="file-preview-name" style="display: block; font-size: 0.82rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; color: var(--text-primary);"></span>
+                                <span id="file-preview-size" style="display: block; font-size: 0.75rem; color: var(--text-muted);"></span>
+                            </div>
+                            <button type="button" id="btn-remove-file" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px; font-size: 1rem;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        
                         @error('photo') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
 
@@ -191,4 +216,66 @@
         </div>
     </div>
 </section>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photo-input');
+    const btnGallery = document.getElementById('btn-gallery');
+    const btnCamera = document.getElementById('btn-camera');
+    const previewContainer = document.getElementById('file-preview-container');
+    const previewImg = document.getElementById('file-preview-img');
+    const previewName = document.getElementById('file-preview-name');
+    const previewSize = document.getElementById('file-preview-size');
+    const btnRemove = document.getElementById('btn-remove-file');
+
+    if (btnGallery && btnCamera && photoInput) {
+        btnGallery.addEventListener('click', function() {
+            photoInput.removeAttribute('capture');
+            photoInput.click();
+        });
+
+        btnCamera.addEventListener('click', function() {
+            photoInput.setAttribute('capture', 'environment');
+            photoInput.click();
+        });
+
+        photoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // Read and show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+
+                previewName.textContent = file.name;
+                // Format size
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                previewSize.textContent = sizeInMB + ' MB';
+                
+                previewContainer.style.display = 'flex';
+            } else {
+                clearPreview();
+            }
+        });
+    }
+
+    if (btnRemove) {
+        btnRemove.addEventListener('click', function() {
+            clearPreview();
+        });
+    }
+
+    function clearPreview() {
+        if (photoInput) photoInput.value = '';
+        if (previewImg) previewImg.src = '';
+        if (previewName) previewName.textContent = '';
+        if (previewSize) previewSize.textContent = '';
+        if (previewContainer) previewContainer.style.display = 'none';
+    }
+});
+</script>
 @endsection
