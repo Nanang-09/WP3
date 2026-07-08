@@ -201,7 +201,11 @@
                             </div>
                             <p>{{ $update->description }}</p>
                             @if($update->photo_url)
-                                <img src="{{ $update->photo_url }}" alt="{{ $update->title }}" class="timeline-photo">
+                                <img src="{{ $update->photo_url }}" alt="{{ $update->title }}" class="timeline-photo" 
+                                     onclick="openProgressLightbox('{{ $update->photo_url }}', '{{ addslashes($update->title) }}')"
+                                     style="cursor: zoom-in; max-width: 100%; border-radius: 8px; margin-top: 10px; transition: transform 0.2s;"
+                                     onmouseover="this.style.transform='scale(1.02)'"
+                                     onmouseout="this.style.transform='scale(1)'">
                             @endif
                         </div>
                     @empty
@@ -216,11 +220,49 @@
         </div>
     </div>
 </section>
+
+{{-- Progress Lightbox Modal --}}
+<div id="progress-lightbox" onclick="closeProgressLightbox()" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 20px;">
+    <button onclick="closeProgressLightbox(); event.stopPropagation()" style="position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.15); border: none; color: white; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-times"></i>
+    </button>
+    <img id="progress-lightbox-img" src="" alt="" style="max-width: 90vw; max-height: 80vh; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); object-fit: contain;">
+    <p id="progress-lightbox-caption" style="color: #e2e8f0; font-size: 0.9rem; text-align: center; max-width: 600px;"></p>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+function openProgressLightbox(src, caption) {
+    const lb = document.getElementById('progress-lightbox');
+    if (!lb) return;
+    document.getElementById('progress-lightbox-img').src = src;
+    document.getElementById('progress-lightbox-caption').textContent = caption;
+    lb.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeProgressLightbox() {
+    const lb = document.getElementById('progress-lightbox');
+    if (lb) lb.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Attach to milestone zoom triggers
+    document.querySelectorAll('.portfolio-zoom-trigger').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const src = this.getAttribute('data-lightbox-src');
+            const caption = this.getAttribute('data-lightbox-caption');
+            openProgressLightbox(src, caption);
+        });
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeProgressLightbox();
+    });
+
     const photoInput = document.getElementById('photo-input');
     const btnGallery = document.getElementById('btn-gallery');
     const btnCamera = document.getElementById('btn-camera');
