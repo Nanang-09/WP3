@@ -19,20 +19,44 @@
     <div class="container">
         <div class="services-grid">
             @foreach($services as $service)
-            <div class="card fade-in">
-                <div class="card-icon">
-                    <i class="{{ $service->icon }}"></i>
+            <div class="service-card fade-in">
+                <div class="service-card-image">
+                    @if($service->image)
+                        <img src="{{ asset($service->image) }}" alt="{{ $service->name }}" loading="lazy">
+                    @else
+                        <div class="service-card-no-image">
+                            <i class="fas fa-image"></i>
+                            <span>Foto segera hadir</span>
+                        </div>
+                    @endif
                 </div>
-                <h3 class="card-title">{{ $service->name }}</h3>
-                <p class="card-text">{{ $service->short_description }}</p>
-                <p class="card-price">Mulai dari {{ $service->formatted_price }}</p>
-                <div style="display: flex; gap: 12px; margin-top: 16px;">
-                    <a href="{{ route('services.show', $service->slug) }}" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-info-circle"></i> Detail
-                    </a>
-                    <a href="{{ route('order.create', $service->slug) }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-shopping-cart"></i> Pesan
-                    </a>
+                <div class="service-card-body">
+                    <h3 class="service-card-title">{{ $service->name }}</h3>
+                    <p class="service-card-text">{{ $service->short_description }}</p>
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                        <a href="{{ route('services.show', $service->slug) }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-info-circle"></i> Detail
+                        </a>
+                        @auth
+                            @if(auth()->user()->isCustomer())
+                                <a href="{{ route('order.create', $service->slug) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-shopping-cart"></i> Pesan
+                                </a>
+                            @elseif(auth()->user()->isAdmin())
+                                <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-clipboard-list"></i> Kelola
+                                </a>
+                            @elseif(auth()->user()->isForeman())
+                                <a href="{{ route('foreman.dashboard') }}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-helmet-safety"></i> Panel Mandor
+                                </a>
+                            @endif
+                        @else
+                            <a href="{{ route('order.create', $service->slug) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-shopping-cart"></i> Pesan
+                            </a>
+                        @endauth
+                    </div>
                 </div>
             </div>
             @endforeach

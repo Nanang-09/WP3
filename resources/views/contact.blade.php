@@ -26,7 +26,7 @@
                     </div>
                     <div>
                         <h4>Alamat</h4>
-                        <p>Jl. Konstruksi No. 88, Pancoran<br>Jakarta Selatan 12780</p>
+                        <p>Jl. Ahmad Yani, Gerimax Indah, Kec. Narmada<br>Kabupaten Lombok Barat, Nusa Tenggara Barat</p>
                     </div>
                 </div>
                 <div class="contact-info-item">
@@ -35,7 +35,7 @@
                     </div>
                     <div>
                         <h4>Telepon</h4>
-                        <p>+62 812-3456-7890<br>+62 21-7890-1234</p>
+                        <p>+62 878-6541-0555</p>
                     </div>
                 </div>
                 <div class="contact-info-item">
@@ -44,7 +44,7 @@
                     </div>
                     <div>
                         <h4>Email</h4>
-                        <p>info@weldtrack.com<br>order@weldtrack.com</p>
+                        <p>rifaifarid@gmail.com</p>
                     </div>
                 </div>
                 <div class="contact-info-item">

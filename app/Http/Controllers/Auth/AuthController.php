@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\MathCaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,12 +12,21 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function showLogin()
+    {
+        return view('auth.login', [
+            'captcha' => MathCaptcha::generate(),
+        ]);
+    }
+
     /**
      * Show the application registration form.
      */
     public function register()
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'captcha' => MathCaptcha::generate(),
+        ]);
     }
 
     /**
@@ -28,18 +38,27 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', 'min:8'],
+            'captcha_answer' => ['required', 'integer'],
+        ], [
+            'captcha_answer.required' => 'Jawaban captcha wajib diisi.',
         ]);
+
+        if (! MathCaptcha::validate($request->input('captcha_answer'))) {
+            throw ValidationException::withMessages([
+                'captcha_answer' => 'Jawaban captcha salah. Silakan coba lagi.',
+            ]);
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'customer',
+            'role' => User::ROLE_CUSTOMER,
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('home');
+        return redirect()->intended(route('home'));
     }
 
     /**
@@ -50,16 +69,21 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'captcha_answer' => ['required', 'integer'],
+        ], [
+            'captcha_answer.required' => 'Jawaban captcha wajib diisi.',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (! MathCaptcha::validate($request->input('captcha_answer'))) {
+            throw ValidationException::withMessages([
+                'captcha_answer' => 'Jawaban captcha salah. Silakan coba lagi.',
+            ]);
+        }
+
+        if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
 
-            if (auth()->user()->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            }
-
-            return redirect()->route('home');
+            return redirect()->intended($this->homeRouteFor(auth()->user()));
         }
 
         throw ValidationException::withMessages([
@@ -78,5 +102,18 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    public static function homeRouteFor(User $user): string
+    {
+        if ($user->isAdmin()) {
+            return route('admin.dashboard');
+        }
+
+        if ($user->isForeman()) {
+            return route('foreman.dashboard');
+        }
+
+        return route('home');
     }
 }

@@ -15,6 +15,14 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'business_name' => env('BUSINESS_NAME', 'CV SUNRISE ISLAND'),
+
+    'admin_email' => env('ADMIN_EMAIL', 'rifaifarid@gmail.com'),
+
+    'admin_whatsapp' => env('ADMIN_WHATSAPP', '6287865410555'),
+
+    'secondary_whatsapp' => env('SECONDARY_WHATSAPP', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -65,7 +73,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Makassar',
 
     /*
     |--------------------------------------------------------------------------

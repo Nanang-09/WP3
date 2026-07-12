@@ -49,20 +49,29 @@ class OrderManagementController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $validated = $request->validate([
+        $rules = [
             'status' => 'required|in:scheduled,confirmed,in_progress,completed',
             'admin_notes' => 'nullable|string|max:2000',
             'foreman_id' => [
                 'nullable',
                 Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', User::ROLE_FOREMAN)),
             ],
-            'consultation_date' => 'nullable|date|required_if:status,scheduled',
-            'consultation_time' => 'nullable|string|max:100|required_if:status,scheduled',
+            'consultation_date' => 'nullable|date',
+            'consultation_time' => 'nullable|string|max:100',
             'consultation_place' => 'nullable|string|max:255',
             'project_price' => 'nullable|numeric|min:0',
             'project_start_date' => 'nullable|date',
             'project_end_date' => 'nullable|date|after_or_equal:project_start_date',
-        ]);
+            'is_consultation_confirmed' => 'nullable|boolean',
+        ];
+
+        // Require consultation details only if moving to scheduled status from a non-scheduled status
+        if ($request->input('status') === 'scheduled' && $order->status !== Order::STATUS_SCHEDULED) {
+            $rules['consultation_date'] = 'required|date';
+            $rules['consultation_time'] = 'required|string|max:100';
+        }
+
+        $validated = $request->validate($rules);
 
         // Strip consultation fields if not scheduling
         if ($validated['status'] !== Order::STATUS_SCHEDULED) {

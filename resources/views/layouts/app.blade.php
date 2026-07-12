@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="WeldTrack - Solusi terpercaya untuk jasa konstruksi bangunan, pengelasan, dan renovasi profesional.">
     <title>@yield('title', 'WeldTrack - Jasa Konstruksi & Pengelasan Profesional')</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,8 +19,11 @@
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
             <a href="{{ route('home') }}" class="nav-brand">
-                <i class="fas fa-fire"></i>
-                <span>Weld<span class="brand-accent">Track</span></span>
+                <img src="{{ asset('images/logo.png') }}" alt="WeldTrack Logo" class="brand-logo" style="height: 40px; width: auto; object-fit: contain;">
+                <span class="brand-text">
+                    <span class="brand-name">Weld<span class="brand-accent">Track</span></span>
+                    <span class="brand-tagline">jasa las pulau lombok</span>
+                </span>
             </a>
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span></span><span></span><span></span>
@@ -30,12 +35,17 @@
                 <li><a href="{{ route('contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Kontak</a></li>
                 @auth
                     @if(auth()->user()->isAdmin())
-                        <li><a href="{{ route('admin.dashboard') }}" class="nav-link">Dashboard</a></li>
+                        <li><a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}">Panel Admin</a></li>
+                    @elseif(auth()->user()->isForeman())
+                        <li><a href="{{ route('foreman.dashboard') }}" class="nav-link {{ request()->routeIs('foreman.*') ? 'active' : '' }}">Panel Mandor</a></li>
+                    @else
+                        <li><a href="{{ route('order.index') }}" class="nav-link {{ request()->routeIs('order.*') ? 'active' : '' }}">Pesanan & Progres</a></li>
+                        <li><a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">Pengaturan Akun</a></li>
                     @endif
                     <li>
-                        <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                        <form action="{{ route('logout') }}" method="POST" style="display:inline;" id="logoutFormNav">
                             @csrf
-                            <button type="submit" class="nav-link btn-link">Logout</button>
+                            <button type="button" class="nav-link btn-link" onclick="confirmLogout('logoutFormNav')">Logout</button>
                         </form>
                     </li>
                 @else
@@ -55,6 +65,15 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-error" id="flashAlertError" style="background: rgba(239, 68, 68, 0.12); border-bottom: 1px solid rgba(239, 68, 68, 0.25); color: #fecaca;">
+            <div class="container">
+                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                <button class="alert-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            </div>
+        </div>
+    @endif
+
     {{-- Main Content --}}
     <main>
         @yield('content')
@@ -66,7 +85,7 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <a href="{{ route('home') }}" class="footer-logo">
-                        <i class="fas fa-fire"></i>
+                        <img src="{{ asset('images/logo.png') }}" alt="WeldTrack Logo" class="brand-logo" style="height: 40px; width: auto; object-fit: contain;">
                         <span>Weld<span class="brand-accent">Track</span></span>
                     </a>
                     <p>Solusi terpercaya untuk jasa konstruksi bangunan, pengelasan, dan renovasi profesional dengan standar kualitas terbaik.</p>
@@ -83,7 +102,6 @@
                         <li><a href="{{ route('services.index') }}">Pembangunan Rumah</a></li>
                         <li><a href="{{ route('services.index') }}">Renovasi Bangunan</a></li>
                         <li><a href="{{ route('services.index') }}">Konstruksi Baja & Las</a></li>
-                        <li><a href="{{ route('services.index') }}">Desain Interior</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
@@ -98,9 +116,9 @@
                 <div class="footer-contact">
                     <h4>Hubungi Kami</h4>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Jl. Konstruksi No. 88, Jakarta Selatan</li>
-                        <li><i class="fas fa-phone"></i> +62 812-3456-7890</li>
-                        <li><i class="fas fa-envelope"></i> info@weldtrack.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jl. Ahmad Yani, Gerimax Indah, Kec. Narmada, Kabupaten Lombok Barat, Nusa Tenggara Barat</li>
+                        <li><i class="fas fa-phone"></i> +62 878-6541-0555</li>
+                        <li><i class="fas fa-envelope"></i> rifaifarid@gmail.com</li>
                         <li><i class="fas fa-clock"></i> Sen - Sab: 08.00 - 17.00</li>
                     </ul>
                 </div>
@@ -112,6 +130,13 @@
     </footer>
 
     <script src="{{ asset('js/app.js') }}"></script>
+    <script>
+        function confirmLogout(formId) {
+            if (confirm('Apakah Anda yakin ingin keluar dari akun ini?')) {
+                document.getElementById(formId).submit();
+            }
+        }
+    </script>
     @yield('scripts')
 </body>
 </html>

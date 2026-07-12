@@ -11,7 +11,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
-    private const SUPPORTED_PROVIDERS = ['google', 'facebook'];
+    private const SUPPORTED_PROVIDERS = ['google'];
 
     /**
      * Redirect the user to the provider authentication page.
@@ -20,7 +20,7 @@ class SocialAuthController extends Controller
     {
         abort_unless($this->isSupportedProvider($provider), 404);
 
-        if (!$this->isProviderConfigured($provider)) {
+        if (! $this->isProviderConfigured($provider)) {
             return redirect()
                 ->route('login')
                 ->withErrors(['email' => $this->missingConfigMessage($provider)]);
@@ -36,7 +36,7 @@ class SocialAuthController extends Controller
     {
         abort_unless($this->isSupportedProvider($provider), 404);
 
-        if (!$this->isProviderConfigured($provider)) {
+        if (! $this->isProviderConfigured($provider)) {
             return redirect()
                 ->route('login')
                 ->withErrors(['email' => $this->missingConfigMessage($provider)]);
@@ -45,41 +45,42 @@ class SocialAuthController extends Controller
         try {
             $socialUser = Socialite::driver($provider)->user();
         } catch (\Exception $e) {
-            return redirect()->route('login')->withErrors(['email' => 'Gagal login melalui ' . ucfirst($provider) . '. Silakan coba lagi.']);
+            \Illuminate\Support\Facades\Log::error('Social Login Error for ' . $provider . ': ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+            return redirect()->route('login')->withErrors(['email' => 'Gagal login melalui '.ucfirst($provider).'. Silakan coba lagi.']);
         }
 
-        if (!$socialUser->getEmail()) {
-            return redirect()->route('login')->withErrors(['email' => 'Akun ' . ucfirst($provider) . ' Anda tidak mengembalikan email. Gunakan provider lain atau login manual.']);
+        if (! $socialUser->getEmail()) {
+            return redirect()->route('login')->withErrors(['email' => 'Akun '.ucfirst($provider).' Anda tidak mengembalikan email. Gunakan provider lain atau login manual.']);
         }
 
-        // Check if user already exists
         $user = User::where('email', $socialUser->getEmail())->first();
 
         if ($user) {
-            // Update provider info if needed, or just login
-            if (!$user->provider_id) {
-                $user->update([
-                    'provider_name' => $provider,
-                    'provider_id' => $socialUser->getId(),
-                    'provider_token' => $socialUser->token,
-                ]);
-            }
+            $user->update([
+                'provider_name' => $provider,
+                'provider_id' => $socialUser->getId(),
+                'provider_token' => $socialUser->token,
+            ]);
         } else {
-            // Register new user
             $user = User::create([
                 'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
                 'email' => $socialUser->getEmail(),
-                'password' => Hash::make(Str::random(24)),
-                'role' => 'customer',
+                'password' => Hash::make(Str::random(32)),
+                'role' => User::ROLE_CUSTOMER,
                 'provider_name' => $provider,
                 'provider_id' => $socialUser->getId(),
                 'provider_token' => $socialUser->token,
             ]);
         }
 
-        Auth::login($user);
+        Auth::login($user, remember: true);
 
-        return redirect()->route('home');
+        return redirect()->intended(AuthController::homeRouteFor($user))
+            ->with('success', $user->wasRecentlyCreated
+                ? 'Akun Google berhasil dibuat. Selamat datang!'
+                : 'Berhasil masuk dengan Google.');
     }
 
     private function isSupportedProvider(string $provider): bool
@@ -98,7 +99,7 @@ class SocialAuthController extends Controller
     {
         $providerKey = strtoupper($provider);
 
-        return 'Login dengan ' . ucfirst($provider) . ' belum dikonfigurasi. Isi '
-            . "{$providerKey}_CLIENT_ID dan {$providerKey}_CLIENT_SECRET di file .env, lalu jalankan php artisan config:clear.";
+        return 'Login dengan '.ucfirst($provider).' belum dikonfigurasi. Isi '
+            .$providerKey.'_CLIENT_ID dan '.$providerKey.'_CLIENT_SECRET di file .env, lalu jalankan php artisan config:clear.';
     }
 }

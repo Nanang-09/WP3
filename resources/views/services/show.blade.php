@@ -45,9 +45,25 @@
                     <h3>{{ $service->name }}</h3>
                     <div class="price">Rp {{ number_format($service->price_start, 0, ',', '.') }}</div>
                     <div class="price-unit">{{ $service->price_unit }}</div>
-                    <a href="{{ route('order.create', $service->slug) }}" class="btn btn-primary" style="width: 100%;">
-                        <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-                    </a>
+                    @auth
+                        @if(auth()->user()->isCustomer())
+                            <a href="{{ route('order.create', $service->slug) }}" class="btn btn-primary" style="width: 100%;">
+                                <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+                            </a>
+                        @elseif(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary" style="width: 100%;">
+                                <i class="fas fa-clipboard-list"></i> Kelola Pesanan di Panel Admin
+                            </a>
+                        @elseif(auth()->user()->isForeman())
+                            <a href="{{ route('foreman.dashboard') }}" class="btn btn-secondary" style="width: 100%;">
+                                <i class="fas fa-helmet-safety"></i> Kembali ke Panel Mandor
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('order.create', $service->slug) }}" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+                        </a>
+                    @endauth
                     <a href="https://wa.me/6281234567890?text=Halo, saya tertarik dengan layanan {{ $service->name }}" class="btn btn-outline" style="width: 100%; margin-top: 12px;" target="_blank">
                         <i class="fab fa-whatsapp"></i> Tanya via WhatsApp
                     </a>

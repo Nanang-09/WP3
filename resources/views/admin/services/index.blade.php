@@ -26,7 +26,7 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Icon</th>
+                    <th>Foto</th>
                     <th>Nama Layanan</th>
                     <th>Harga Mulai</th>
                     <th>Featured</th>
@@ -37,7 +37,14 @@
             <tbody>
                 @forelse($services as $service)
                 <tr>
-                    <td class="table-primary"><i class="{{ $service->icon }}" style="font-size: 1.1rem; color: var(--accent-blue);"></i></td>
+                    <td>
+                        @if($service->image)
+                            <img src="{{ asset($service->image) }}" alt="{{ $service->name }}"
+                                 style="width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color);">
+                        @else
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Belum ada foto</span>
+                        @endif
+                    </td>
                     <td class="table-primary">{{ $service->name }}</td>
                     <td>Rp {{ number_format($service->price_start, 0, ',', '.') }} {{ $service->price_unit }}</td>
                     <td>

@@ -45,18 +45,14 @@ class SocialAuthControllerTest extends TestCase
         $response->assertRedirect('https://accounts.google.com/o/oauth2/auth');
     }
 
-    public function test_login_page_shows_social_auth_notice_when_providers_are_not_configured(): void
+    public function test_login_and_register_pages_always_show_google_button(): void
     {
-        config([
-            'services.google.client_id' => null,
-            'services.google.client_secret' => null,
-            'services.facebook.client_id' => null,
-            'services.facebook.client_secret' => null,
-        ]);
+        $loginResponse = $this->get(route('login'));
+        $loginResponse->assertOk();
+        $loginResponse->assertSee(route('social.redirect', 'google'));
 
-        $response = $this->get(route('login'));
-
-        $response->assertOk();
-        $response->assertSee('Login sosial belum aktif di environment ini.', false);
+        $registerResponse = $this->get(route('register'));
+        $registerResponse->assertOk();
+        $registerResponse->assertSee(route('social.redirect', 'google'));
     }
 }

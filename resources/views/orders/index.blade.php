@@ -128,7 +128,9 @@
                                                 <p class="muted-text" style="margin-top: 8px;">Status setelah update: {{ $update['status_after_update_label'] }}</p>
                                             @endif
                                             @if($update['photo_url'])
-                                                <img src="{{ $update['photo_url'] }}" alt="{{ $update['title'] }}" class="timeline-photo">
+                                                <img src="{{ $update['photo_url'] }}" alt="{{ $update['title'] }}" class="timeline-photo"
+                                                     onclick="openPhotoLightbox('{{ $update['photo_url'] }}', '{{ addslashes($update['title']) }}')"
+                                                     title="Klik untuk melihat foto lebih besar">
                                             @endif
                                         </div>
                                     @endforeach
@@ -249,6 +251,15 @@
         </div>
     </div>
 </section>
+
+{{-- Lightbox Modal untuk Foto Progres --}}
+<div id="photoLightbox" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.88); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center; cursor:zoom-out;" onclick="closePhotoLightbox()">
+    <div style="position:relative; max-width:92vw; max-height:92vh; display:flex; flex-direction:column; align-items:center; gap:12px;" onclick="event.stopPropagation()">
+        <button onclick="closePhotoLightbox()" style="position:absolute; top:-14px; right:-14px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.3); color:#fff; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; z-index:10;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">&times;</button>
+        <img id="photoLightboxImg" src="" alt="" style="max-width:88vw; max-height:80vh; object-fit:contain; border-radius:10px; box-shadow:0 8px 48px rgba(0,0,0,0.6); display:block;">
+        <p id="photoLightboxCaption" style="color:rgba(255,255,255,0.85); font-size:0.9rem; text-align:center; max-width:80vw; margin:0;"></p>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -326,7 +337,7 @@
                         ? `<p class="muted-text" style="margin-top: 8px;">Status setelah update: ${escapeHtml(update.status_after_update_label)}</p>`
                         : ''}
                     ${update.photo_url
-                        ? `<img src="${escapeHtml(update.photo_url)}" alt="${escapeHtml(update.title)}" class="timeline-photo">`
+                        ? `<img src="${escapeHtml(update.photo_url)}" alt="${escapeHtml(update.title)}" class="timeline-photo" onclick="openPhotoLightbox('${escapeHtml(update.photo_url)}', '${escapeHtml(update.title)}')" title="Klik untuk melihat foto lebih besar">`
                         : ''}
                 </div>
             `).join('');
@@ -479,7 +490,39 @@
     @csrf
 </form>
 
+<style>
+.timeline-photo {
+    cursor: zoom-in;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    border-radius: 8px;
+}
+.timeline-photo:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    opacity: 0.92;
+}
+</style>
+
 <script>
+function openPhotoLightbox(src, caption) {
+    const lb = document.getElementById('photoLightbox');
+    document.getElementById('photoLightboxImg').src = src;
+    document.getElementById('photoLightboxImg').alt = caption || '';
+    document.getElementById('photoLightboxCaption').textContent = caption || '';
+    lb.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closePhotoLightbox() {
+    document.getElementById('photoLightbox').style.display = 'none';
+    document.body.style.overflow = '';
+    document.getElementById('photoLightboxImg').src = '';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePhotoLightbox();
+});
+
 function cancelOrder(actionUrl) {
     if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
         const form = document.getElementById('globalCancelOrderForm');

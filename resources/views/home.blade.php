@@ -3,14 +3,15 @@
 @section('title', 'WeldTrack - Jasa Konstruksi & Pengelasan Profesional')
 
 @section('content')
-<section class="hero" id="hero">
-    <div class="container">
+<section class="hero" id="hero" style="background-image: url('{{ asset('images/hero-worker.jpg') }}');">
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
         <div class="hero-content">
             <div class="hero-badge">
                 <i class="fas fa-hard-hat"></i> Jasa konstruksi dan pengelasan
             </div>
             <h1 class="hero-title">
-                Tampilan sederhana, proses jelas, hasil kerja tetap profesional.
+                Jasa Konstruksi Baja dan Pengelasan di Lombok.
             </h1>
             <p class="hero-description">
                 WeldTrack membantu Anda memesan layanan konstruksi dengan alur yang mudah dipahami. Pilih layanan, lihat portofolio, lalu hubungi tim kami untuk mulai proyek.
@@ -19,22 +20,18 @@
                 <a href="{{ route('services.index') }}" class="btn btn-primary">
                     <i class="fas fa-list"></i> Lihat Layanan
                 </a>
-                <a href="{{ route('contact') }}" class="btn btn-outline">
+                <a href="{{ route('contact') }}" class="btn btn-outline-white">
                     <i class="fas fa-phone"></i> Konsultasi
                 </a>
             </div>
             <div class="hero-summary">
-                <div class="summary-card">
-                    <strong>500+</strong>
-                    <span>proyek selesai</span>
-                </div>
-                <div class="summary-card">
+                <div class="summary-card summary-card--dark">
                     <strong>Harga jelas</strong>
                     <span>tanpa penjelasan berbelit</span>
                 </div>
-                <div class="summary-card">
+                <div class="summary-card summary-card--dark">
                     <strong>Respon cepat</strong>
-                    <span>tim follow up maksimal 1x24 jam</span>
+                    <span>follow up maks. 1x24 jam</span>
                 </div>
             </div>
         </div>
@@ -86,16 +83,24 @@
         </div>
         <div class="services-grid">
             @foreach($services as $service)
-            <div class="card fade-in">
-                <div class="card-icon">
-                    <i class="{{ $service->icon }}"></i>
+            <div class="service-card fade-in">
+                <div class="service-card-image">
+                    @if($service->image)
+                        <img src="{{ asset($service->image) }}" alt="{{ $service->name }}" loading="lazy">
+                    @else
+                        <div class="service-card-no-image">
+                            <i class="fas fa-image"></i>
+                            <span>Foto segera hadir</span>
+                        </div>
+                    @endif
                 </div>
-                <h3 class="card-title">{{ $service->name }}</h3>
-                <p class="card-text">{{ $service->short_description }}</p>
-                <p class="card-price">Mulai dari {{ $service->formatted_price }}</p>
-                <a href="{{ route('services.show', $service->slug) }}" class="card-link">
-                    Selengkapnya <i class="fas fa-arrow-right"></i>
-                </a>
+                <div class="service-card-body">
+                    <h3 class="service-card-title">{{ $service->name }}</h3>
+                    <p class="service-card-text">{{ $service->short_description }}</p>
+                    <a href="{{ route('services.show', $service->slug) }}" class="card-link">
+                        Selengkapnya <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
             </div>
             @endforeach
         </div>
@@ -115,14 +120,18 @@
             @foreach($portfolios as $portfolio)
             <a href="{{ route('portfolios.show', $portfolio->slug) }}" class="portfolio-card fade-in">
                 <div class="portfolio-image">
-                    <i class="fas fa-building"></i>
+                    @if($portfolio->image_url)
+                        <img src="{{ $portfolio->image_url }}" alt="{{ $portfolio->title }}">
+                    @else
+                        <i class="fas fa-building"></i>
+                    @endif
                     <span class="portfolio-category">{{ $portfolio->category }}</span>
                 </div>
                 <div class="portfolio-info">
                     <h3>{{ $portfolio->title }}</h3>
                     <div class="portfolio-meta">
                         <span><i class="fas fa-map-marker-alt"></i> {{ $portfolio->location }}</span>
-                        <span><i class="fas fa-calendar"></i> {{ $portfolio->completion_date->format('M Y') }}</span>
+                        <span><i class="fas fa-calendar"></i> {{ optional($portfolio->completion_date)->format('M Y') ?? '-' }}</span>
                     </div>
                 </div>
             </a>
@@ -136,6 +145,55 @@
     </div>
 </section>
 
+{{-- Maps Section --}}
+<section class="maps-section fade-in" id="lokasi">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">
+                <i class="fas fa-map-marker-alt"></i> Lokasi Kami
+            </div>
+            <h2 class="section-title">Temukan Kami di Sini</h2>
+            <p class="section-subtitle">Jl. Ahmad Yani, Gerimax Indah, Kec. Narmada, Kabupaten Lombok Barat, Nusa Tenggara Barat</p>
+        </div>
+        <div class="maps-wrapper">
+            <iframe
+                src="https://maps.google.com/maps?q=-8.595190,116.172982&z=17&output=embed"
+                width="100%"
+                height="420"
+                style="border: 0; border-radius: 16px; display: block;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Lokasi WeldTrack - Gerimax Indah, Narmada, Lombok Barat">
+            </iframe>
+        </div>
+        <div class="maps-info">
+            <div class="maps-info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <strong>Alamat</strong>
+                    <span>Jl. Ahmad Yani, Gerimax Indah, Kec. Narmada, Lombok Barat, NTB</span>
+                </div>
+            </div>
+            <div class="maps-info-item">
+                <i class="fas fa-phone"></i>
+                <div>
+                    <strong>Telepon</strong>
+                    <span>+62 878-6541-0555</span>
+                </div>
+            </div>
+            <div class="maps-info-item">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <strong>Jam Operasional</strong>
+                    <span>Senin – Sabtu: 08.00 – 17.00 WITA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- 
 <section class="testimonials-section fade-in" id="testimoni">
     <div class="container">
         <div class="section-header">
@@ -168,6 +226,7 @@
         </div>
     </div>
 </section>
+--}}
 
 <section class="cta-section fade-in">
     <div class="container">

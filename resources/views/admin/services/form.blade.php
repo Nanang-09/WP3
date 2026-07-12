@@ -19,7 +19,7 @@
 </div>
 
 <div class="detail-card" style="max-width: 760px;">
-    <form action="{{ isset($service) ? route('admin.services.update', $service) : route('admin.services.store') }}" method="POST">
+    <form action="{{ isset($service) ? route('admin.services.update', $service) : route('admin.services.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @if(isset($service)) @method('PUT') @endif
 
@@ -41,15 +41,35 @@
             @error('description') <p class="form-error">{{ $message }}</p> @enderror
         </div>
 
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Icon (Font Awesome class)</label>
-                <input type="text" name="icon" class="form-control" placeholder="fas fa-home" value="{{ old('icon', $service->icon ?? '') }}">
+        {{-- Foto Layanan --}}
+        <div class="form-group">
+            <label class="form-label">Foto Layanan</label>
+
+            @if(isset($service) && $service->image)
+                <div style="margin-bottom: 12px;">
+                    <img src="{{ asset($service->image) }}" alt="{{ $service->name }}"
+                         style="width: 100%; max-width: 340px; height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <div style="margin-top: 8px;">
+                        <label class="form-check" style="color: var(--accent-red); font-size: 0.88rem;">
+                            <input type="checkbox" name="remove_image" value="1">
+                            Hapus foto ini
+                        </label>
+                    </div>
+                </div>
+            @endif
+
+            <input type="file" name="image" id="image" class="form-control" accept="image/jpg,image/jpeg,image/png,image/webp">
+            <p style="margin-top: 6px; font-size: 0.82rem; color: var(--text-muted);">
+                Format: JPG, PNG, WebP. Maks. 5MB. Disarankan rasio 16:9.
+            </p>
+
+            {{-- Preview --}}
+            <div id="imagePreviewWrapper" style="display: none; margin-top: 12px;">
+                <img id="imagePreview" src="" alt="Preview"
+                     style="width: 100%; max-width: 340px; height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-color);">
             </div>
-            <div class="form-group">
-                <label class="form-label">Urutan</label>
-                <input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', $service->sort_order ?? 0) }}">
-            </div>
+
+            @error('image') <p class="form-error">{{ $message }}</p> @enderror
         </div>
 
         <div class="form-grid">
@@ -62,6 +82,11 @@
                 <label class="form-label">Satuan Harga *</label>
                 <input type="text" name="price_unit" class="form-control" placeholder="per m2" value="{{ old('price_unit', $service->price_unit ?? 'per proyek') }}" required>
             </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Urutan</label>
+            <input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', $service->sort_order ?? 0) }}">
         </div>
 
         <div class="form-row-inline">
@@ -80,4 +105,19 @@
         </button>
     </form>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.getElementById('image')?.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('imagePreview').src = e.target.result;
+            document.getElementById('imagePreviewWrapper').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
 @endsection

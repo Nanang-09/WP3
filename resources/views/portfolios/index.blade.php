@@ -27,14 +27,18 @@
             @foreach($portfolios as $portfolio)
             <a href="{{ route('portfolios.show', $portfolio->slug) }}" class="portfolio-card fade-in" data-category="{{ $portfolio->category }}">
                 <div class="portfolio-image">
-                    <i class="fas fa-building"></i>
+                    @if($portfolio->image_url)
+                        <img src="{{ $portfolio->image_url }}" alt="{{ $portfolio->title }}">
+                    @else
+                        <i class="fas fa-building"></i>
+                    @endif
                     <span class="portfolio-category">{{ $portfolio->category }}</span>
                 </div>
                 <div class="portfolio-info">
                     <h3>{{ $portfolio->title }}</h3>
                     <div class="portfolio-meta">
                         <span><i class="fas fa-map-marker-alt"></i> {{ $portfolio->location }}</span>
-                        <span><i class="fas fa-calendar"></i> {{ $portfolio->completion_date->format('M Y') }}</span>
+                        <span><i class="fas fa-calendar"></i> {{ optional($portfolio->completion_date)->format('M Y') ?? '-' }}</span>
                     </div>
                 </div>
             </a>

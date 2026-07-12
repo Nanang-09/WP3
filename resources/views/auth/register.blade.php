@@ -11,16 +11,12 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 <body>
-    @php
-        $googleConfigured = filled(config('services.google.client_id')) && filled(config('services.google.client_secret'));
-        $facebookConfigured = filled(config('services.facebook.client_id')) && filled(config('services.facebook.client_secret'));
-        $socialAuthConfigured = $googleConfigured || $facebookConfigured;
-    @endphp
+
     <section class="auth-section" style="padding-top: 40px; padding-bottom: 40px;">
         <div class="auth-card">
             <div class="auth-header">
                 <a href="{{ route('home') }}" class="nav-brand">
-                    <i class="fas fa-fire"></i>
+                    <img src="{{ asset('images/logo.png') }}" alt="WeldTrack Logo" class="brand-logo" style="height: 48px; width: auto; object-fit: contain; margin-bottom: 16px;">
                     <span>Weld<span class="brand-accent">Track</span></span>
                 </a>
                 <h2>Buat Akun</h2>
@@ -32,6 +28,8 @@
                     <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
                 </div>
             @endif
+
+
 
             <form action="{{ route('register') }}" method="POST">
                 @csrf
@@ -51,6 +49,11 @@
                     <label class="form-label" for="password_confirmation">Konfirmasi Password</label>
                     <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Ketik ulang password" required minlength="8">
                 </div>
+                <div class="form-group">
+                    <label class="form-label" for="captcha_answer">Verifikasi: berapa hasil {{ $captcha['question'] }}?</label>
+                    <input type="number" id="captcha_answer" name="captcha_answer" class="form-control" placeholder="Jawaban pertambahan" value="{{ old('captcha_answer') }}" required inputmode="numeric">
+                    @error('captcha_answer') <p class="form-error" style="color: var(--accent-red); font-size: 0.85rem; margin-top: 6px;">{{ $message }}</p> @enderror
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
                     <i class="fas fa-user-plus"></i> Daftar
                 </button>
@@ -58,36 +61,14 @@
 
             <div style="margin-top: 24px; text-align: center; position: relative;">
                 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
-                <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: var(--text-muted); font-size: 0.85rem;">Atau daftar dengan</span>
+                <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--surface, white); padding: 0 10px; color: var(--text-muted); font-size: 0.85rem;">Atau daftar dengan</span>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 24px;">
-                @if($googleConfigured)
-                    <a href="{{ route('social.redirect', 'google') }}" class="btn" style="flex: 1; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-color); box-shadow: none;">
-                        <i class="fa-brands fa-google" style="color: #ea4335;"></i> Google
-                    </a>
-                @else
-                    <button type="button" class="btn" disabled style="flex: 1; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-muted); box-shadow: none; opacity: 0.6; cursor: not-allowed;" title="Isi GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET di file .env untuk mengaktifkan login Google.">
-                        <i class="fa-brands fa-google" style="color: #ea4335;"></i> Google
-                    </button>
-                @endif
-
-                @if($facebookConfigured)
-                    <a href="{{ route('social.redirect', 'facebook') }}" class="btn" style="flex: 1; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-color); box-shadow: none;">
-                        <i class="fa-brands fa-facebook" style="color: #1877f2;"></i> Facebook
-                    </a>
-                @else
-                    <button type="button" class="btn" disabled style="flex: 1; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-muted); box-shadow: none; opacity: 0.6; cursor: not-allowed;" title="Isi FACEBOOK_CLIENT_ID dan FACEBOOK_CLIENT_SECRET di file .env untuk mengaktifkan login Facebook.">
-                        <i class="fa-brands fa-facebook" style="color: #1877f2;"></i> Facebook
-                    </button>
-                @endif
+            <div style="margin-top: 24px;">
+                <a href="{{ route('social.redirect', 'google') }}" class="btn" style="width: 100%; border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-color); box-shadow: none; text-decoration: none;">
+                    <i class="fa-brands fa-google" style="color: #ea4335;"></i> Google
+                </a>
             </div>
-
-            @if(!$socialAuthConfigured)
-                <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted); text-align: center;">
-                    Login sosial belum aktif di environment ini. Isi kredensial OAuth di file .env lalu jalankan php artisan config:clear.
-                </p>
-            @endif
 
             <p style="text-align: center; margin-top: 24px; font-size: 0.9rem;">
                 Sudah punya akun? <a href="{{ route('login') }}" style="color: var(--accent-blue); font-weight: 600;">Masuk di sini</a>

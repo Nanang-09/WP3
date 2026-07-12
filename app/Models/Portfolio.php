@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 
 class Portfolio extends Model
 {
@@ -20,5 +21,20 @@ class Portfolio extends Model
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (blank($this->image)) {
+            return null;
+        }
+
+        $relativePath = ltrim($this->image, '/');
+
+        if (! File::exists(public_path($relativePath))) {
+            return null;
+        }
+
+        return asset($relativePath);
     }
 }
